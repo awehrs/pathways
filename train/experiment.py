@@ -22,7 +22,6 @@ The scaled-up hyperparameters requires a distributed learning setup to run,
 and this script will need to be adapted to your specific setup.
 """
 import functools
-from sys import argv
 from typing import Generator, Mapping, Text, Tuple
 
 from absl import app
@@ -205,8 +204,6 @@ def get_config():
     config.lock()
 
     return config
-
-class 
 
 
 class Experiment(experiment.AbstractExperiment):
