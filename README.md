@@ -24,7 +24,7 @@ between pathways.
 
 After installing dependencies with `pip install -r requirements.txt`,
 re-install ml_collections from source: 
-`pip install git+https://github.com/google/ml_collections`
+`pip install git+https://github.com/google/ml_collections --upgrade`
 (pip's version of ml_collecitons is too old to play nice with Jaxline)
 
 
