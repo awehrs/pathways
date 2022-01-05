@@ -22,7 +22,7 @@ between pathways.
 
 ## Usage
 
-After installing dependencies with `pip install -f requirements.txt`,
+After installing dependencies with `pip install -r requirements.txt`,
 re-install ml_collections from source: 
 `pip install git+https://github.com/google/ml_collections`
 (pip's version of ml_collecitons is too old to play nice with Jaxline)
