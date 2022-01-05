@@ -37,6 +37,7 @@ from jaxline import utils as jl_utils
 from ml_collections import config_dict
 import numpy as np
 import optax
+import os
 
 
 from perceiver import io_processors
@@ -193,7 +194,7 @@ def get_config():
     config.save_checkpoint_interval = 300
     config.eval_specific_checkpoint_dir = ""
     config.best_model_eval_metric = "eval_top_1_acc"
-    config.checkpoint_dir = "/tmp/perceiver_imagnet_checkpoints"
+    config.checkpoint_dir = os.path.join("perceiver", "perceiver_imagnet_checkpoints")
     config.train_checkpoint_all_hosts = False
 
     # Prevents accidentally setting keys that aren't recognized (e.g. in tests).
