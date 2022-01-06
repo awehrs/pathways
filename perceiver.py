@@ -398,7 +398,6 @@ class SelfAttention(hk.Module):
         dropout_attn_prob = self._dropout_attn_prob if is_training else 0.0
 
         x = inputs
-        batch, pathways, x_time, latent_channels = x.shape
         qkv_inputs = layer_norm(inputs)
         attention = Attention(
             num_q_pathways=self._num_pathways,
@@ -457,7 +456,7 @@ class CrossAttention(hk.Module):
         dropout_prob = self._dropout_prob if is_training else 0.0
         dropout_attn_prob = self._dropout_attn_prob if is_training else 0.0
 
-        batch, q_pathways, q_time, output_channels = inputs_q.shape
+        batch, _, _, output_channels = inputs_q.shape
         if self._shape_for_attn == "q":
             qk_channels = inputs_q.shape[-1]
         elif self._shape_for_attn == "kv":
