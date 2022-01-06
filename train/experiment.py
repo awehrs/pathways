@@ -66,7 +66,7 @@ def get_config():
     config = base_config.get_base_config()
 
     # Experiment config.
-    local_batch_size = 64
+    local_batch_size = 16
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
     config.n_epochs = 1

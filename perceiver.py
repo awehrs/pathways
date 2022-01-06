@@ -413,17 +413,12 @@ class SelfAttention(hk.Module):
         attention = hk.dropout(hk.next_rng_key(), dropout_prob, attention)
         x += attention
 
-        # Apply same position-wise MLP to each pathway.
-        x = jnp.reshape(x, (batch, pathways * x_time, latent_channels))
-
         x += MLP(
             widening_factor=self._widening_factor,
             dropout_prob=dropout_prob,
             init_scale=self._dense_init_scale,
         )(layer_norm(x), is_training=is_training)
 
-        # Reshape to unfused view.
-        x = jnp.reshape(x, (batch, pathways, x_time, latent_channels))
         return x
 
 
@@ -482,18 +477,17 @@ class CrossAttention(hk.Module):
         if len(inputs_kv.shape) == 3:
             # Cross attention with single-pathway inputs (e.g., initial encoder cross-attend).
             _, kv_time, kv_channels = inputs_kv.shape
-            kv_pathways = 1
+            inputs_kv = jnp.expand_dims(inputs_kv, axis=1)
         elif len(inputs_kv.shape) == 4:
             # Cross attention with multi-pathway inputs (e.g., decoder cross-attend)
             _, kv_pathways, kv_time, kv_channels = inputs_kv.shape
+            inputs_kv = jnp.reshape(
+                inputs_kv, (batch, 1, kv_pathways * kv_time, kv_channels)
+            )
         else:
             raise ValueError(
                 f"inputs_kv.shape ({inputs_kv.shape}) must be of length 3 or 4"
             )
-
-        inputs_kv = jnp.reshape(
-            inputs_kv, (batch, 1, kv_pathways * kv_time, kv_channels)
-        )
 
         attention = Attention(
             num_q_pathways=self._num_pathways,
@@ -515,17 +509,12 @@ class CrossAttention(hk.Module):
         else:
             x = attention
 
-        # Apply same position-wise MLP to each pathway.
-        x = jnp.reshape(x, (batch, q_pathways * q_time, output_channels))
-
         x += MLP(
             widening_factor=self._widening_factor,
             dropout_prob=dropout_prob,
             init_scale=self._dense_init_scale,
         )(layer_norm(x), is_training=is_training)
 
-        # Reshapee to unfused view.
-        x = jnp.reshape(x, (batch, q_pathways, q_time, output_channels))
         return x
 
 
