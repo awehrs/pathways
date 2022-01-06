@@ -69,7 +69,7 @@ def get_config():
     local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 100
+    config.n_epochs = 10
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value
@@ -138,7 +138,7 @@ def get_config():
                             num_channels_for_pathways=256,
                             concat_or_add_pos="concat",
                             num_cross_attend_heads_per_pathway=1,
-                            num_self_attend_heads_per_pathway=8,
+                            num_self_attend_heads_per_pathway=1,
                             cross_attend_widening_factor=1,
                             self_attend_widening_factor=1,
                             dropout_prob=0.0,
