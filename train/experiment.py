@@ -81,7 +81,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=.001, #5e-4,
+                    base_lr=0.1, #5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
