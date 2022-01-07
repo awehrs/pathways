@@ -69,7 +69,7 @@ def get_config():
     local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 50
+    config.n_epochs = 25
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value
@@ -81,7 +81,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=5e-4,
+                    base_lr=.001 #5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
