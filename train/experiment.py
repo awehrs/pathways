@@ -27,6 +27,7 @@ from typing import Generator, Mapping, Text, Tuple
 from absl import app
 from absl import flags
 from absl import logging
+import datetime
 import haiku as hk
 import jax
 import jax.numpy as jnp
@@ -69,7 +70,7 @@ def get_config():
     local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 25
+    config.n_epochs = 1
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value
@@ -81,7 +82,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=0.1, #5e-4,
+                    base_lr=5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
@@ -132,7 +133,7 @@ def get_config():
                             num_self_attends_per_block=_default_or_debug(6, 2),
                             # Weights won't be shared if num_blocks is set to 1.
                             num_blocks=_default_or_debug(8, 2),
-                            num_pathways_per_block=1,
+                            num_pathways_per_block=8,
                             z_index_dim=512,
                             num_z_channels=1024,
                             num_channels_for_pathways=256,
@@ -194,7 +195,9 @@ def get_config():
     config.save_checkpoint_interval = 300
     config.eval_specific_checkpoint_dir = ""
     config.best_model_eval_metric = "eval_top_1_acc"
-    config.checkpoint_dir = os.path.join("perceiver", "perceiver_imagnet_checkpoints")
+    config.checkpoint_dir = os.path.join(
+        "perceiver", "logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    )
     config.train_checkpoint_all_hosts = False
 
     # Prevents accidentally setting keys that aren't recognized (e.g. in tests).
@@ -512,10 +515,5 @@ class Experiment(experiment.AbstractExperiment):
 
 if __name__ == "__main__":
     flags.mark_flag_as_required("config")
-    app.run(
-        functools.partial(
-            platform.main,
-            Experiment,  # , checkpointer_factory=platform.create_checkpointer
-        )
-    )
+    app.run(functools.partial(platform.main, Experiment,))
 
