@@ -67,7 +67,7 @@ def get_config():
     config = base_config.get_base_config()
 
     # Experiment config.
-    local_batch_size = 8
+    local_batch_size = 16
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
     config.n_epochs = 1
@@ -196,7 +196,7 @@ def get_config():
     config.eval_specific_checkpoint_dir = ""
     config.best_model_eval_metric = "eval_top_1_acc"
     config.checkpoint_dir = os.path.join(
-        "perceiver", "logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        "perceiver", "logs"  # , datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     )
     config.train_checkpoint_all_hosts = False
 
