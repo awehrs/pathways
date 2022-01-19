@@ -40,7 +40,6 @@ import numpy as np
 import optax
 import os
 
-
 from perceiver import io_processors
 from perceiver import perceiver
 import dataset
@@ -89,18 +88,30 @@ def get_config():
                     decay_pos_embs=True,
                     scale_by_batch=True,
                     cosine_decay_kwargs=dict(
-                        init_value=0.0, warmup_epochs=0, end_value=0.0,
+                        init_value=0.0,
+                        warmup_epochs=0,
+                        end_value=0.0,
                     ),
                     step_decay_kwargs=dict(
-                        decay_boundaries=[0.5, 0.8, 0.95], decay_rate=0.1,
+                        decay_boundaries=[0.5, 0.8, 0.95],
+                        decay_rate=0.1,
                     ),
                     constant_cosine_decay_kwargs=dict(
-                        constant_fraction=0.5, end_value=0.0,
+                        constant_fraction=0.5,
+                        end_value=0.0,
                     ),
                     optimizer="lamb",
                     # Optimizer-specific kwargs:
-                    adam_kwargs=dict(b1=0.9, b2=0.999, eps=1e-8,),
-                    lamb_kwargs=dict(b1=0.9, b2=0.999, eps=1e-6,),
+                    adam_kwargs=dict(
+                        b1=0.9,
+                        b2=0.999,
+                        eps=1e-8,
+                    ),
+                    lamb_kwargs=dict(
+                        b1=0.9,
+                        b2=0.999,
+                        eps=1e-6,
+                    ),
                 ),
                 # Don't specify output_channels - it's not used for
                 # classifiers.
@@ -154,7 +165,8 @@ def get_config():
                             # Position encoding for the output logits.
                             position_encoding_type="trainable",
                             trainable_position_encoding_kwargs=dict(
-                                num_channels=1024, init_scale=0.02,
+                                num_channels=1024,
+                                init_scale=0.02,
                             ),
                         ),
                     ),
@@ -181,7 +193,10 @@ def get_config():
                         mixup_alpha=0.2,
                     ),
                 ),
-                evaluation=dict(subset="test", batch_size=2,),
+                evaluation=dict(
+                    subset="test",
+                    batch_size=2,
+                ),
             )
         )
     )
@@ -247,7 +262,11 @@ class Experiment(experiment.AbstractExperiment):
         )
         self._eval_batch = jax.jit(self._eval_batch)
 
-    def _forward_fn(self, inputs: dataset.Batch, is_training: bool,) -> jnp.ndarray:
+    def _forward_fn(
+        self,
+        inputs: dataset.Batch,
+        is_training: bool,
+    ) -> jnp.ndarray:
 
         images = inputs["images"]
 
@@ -392,7 +411,11 @@ class Experiment(experiment.AbstractExperiment):
         top_1_acc = metrics["top_1_acc"]
         top_5_acc = metrics["top_5_acc"]
 
-        loss_scalars = dict(loss=loss, top_1_acc=top_1_acc, top_5_acc=top_5_acc,)
+        loss_scalars = dict(
+            loss=loss,
+            top_1_acc=top_1_acc,
+            top_5_acc=top_5_acc,
+        )
 
         return scaled_loss, (loss_scalars, state)
 
@@ -515,5 +538,9 @@ class Experiment(experiment.AbstractExperiment):
 
 if __name__ == "__main__":
     flags.mark_flag_as_required("config")
-    app.run(functools.partial(platform.main, Experiment,))
-
+    app.run(
+        functools.partial(
+            platform.main,
+            Experiment,
+        )
+    )
