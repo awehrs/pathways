@@ -211,7 +211,7 @@ def get_config():
     config.eval_specific_checkpoint_dir = ""
     config.best_model_eval_metric = "eval_top_1_acc"
     config.checkpoint_dir = os.path.join(
-        "perceiver", "logs"  # , datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        "pathways", "logs"  # , datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     )
     config.train_checkpoint_all_hosts = False
 
