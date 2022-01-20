@@ -24,7 +24,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from perceiver import position_encoding
+from pathways import position_encoding
 
 
 ModalitySizeT = Mapping[str, int]
@@ -237,7 +237,9 @@ class Conv2DUpsample(hk.Module):
     """Upsamples 4x using 2 2D transposed convolutions."""
 
     def __init__(
-        self, n_outputs: int, name: Optional[str] = None,
+        self,
+        n_outputs: int,
+        name: Optional[str] = None,
     ):
         """Constructs a Conv2DUpsample model.
 

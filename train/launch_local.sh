@@ -18,3 +18,6 @@
 
 PYTHONPATH=.::$PYTHONPATH python pathways/train/experiment.py \
   --config=pathways/train/experiment.py --logtostderr
+
+python3 -m pathways.train.experiment \
+  --config=pathways/configs/config1.py --logtostderr

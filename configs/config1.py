@@ -3,7 +3,7 @@ from jaxline import base_config
 from ml_collections import config_dict
 import os
 
-from .. import dataset
+import pathways.train.dataset as dataset
 
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
@@ -43,18 +43,30 @@ def get_config():
                     decay_pos_embs=True,
                     scale_by_batch=True,
                     cosine_decay_kwargs=dict(
-                        init_value=0.0, warmup_epochs=0, end_value=0.0,
+                        init_value=0.0,
+                        warmup_epochs=0,
+                        end_value=0.0,
                     ),
                     step_decay_kwargs=dict(
-                        decay_boundaries=[0.5, 0.8, 0.95], decay_rate=0.1,
+                        decay_boundaries=[0.5, 0.8, 0.95],
+                        decay_rate=0.1,
                     ),
                     constant_cosine_decay_kwargs=dict(
-                        constant_fraction=0.5, end_value=0.0,
+                        constant_fraction=0.5,
+                        end_value=0.0,
                     ),
                     optimizer="lamb",
                     # Optimizer-specific kwargs:
-                    adam_kwargs=dict(b1=0.9, b2=0.999, eps=1e-8,),
-                    lamb_kwargs=dict(b1=0.9, b2=0.999, eps=1e-6,),
+                    adam_kwargs=dict(
+                        b1=0.9,
+                        b2=0.999,
+                        eps=1e-8,
+                    ),
+                    lamb_kwargs=dict(
+                        b1=0.9,
+                        b2=0.999,
+                        eps=1e-6,
+                    ),
                 ),
                 # Don't specify output_channels - it's not used for
                 # classifiers.
@@ -108,7 +120,8 @@ def get_config():
                             # Position encoding for the output logits.
                             position_encoding_type="trainable",
                             trainable_position_encoding_kwargs=dict(
-                                num_channels=1024, init_scale=0.02,
+                                num_channels=1024,
+                                init_scale=0.02,
                             ),
                         ),
                     ),
@@ -135,7 +148,10 @@ def get_config():
                         mixup_alpha=0.2,
                     ),
                 ),
-                evaluation=dict(subset="test", batch_size=2,),
+                evaluation=dict(
+                    subset="test",
+                    batch_size=2,
+                ),
             )
         )
     )

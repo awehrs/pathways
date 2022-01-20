@@ -27,7 +27,7 @@ import tensorflow.compat.v2 as tf
 import tensorflow_datasets as tfds
 import tensorflow_probability as tfp
 
-from perceiver.train import autoaugment
+from . import autoaugment
 
 
 Batch = Mapping[Text, np.ndarray]
@@ -418,7 +418,8 @@ def _center_crop(image, crop_dim):
 
 
 def _decode_and_center_crop(
-    image_bytes: tf.Tensor, jpeg_shape: Optional[tf.Tensor] = None,
+    image_bytes: tf.Tensor,
+    jpeg_shape: Optional[tf.Tensor] = None,
 ) -> Tuple[tf.Tensor, tf.Tensor]:
     """Crops to center of image with padding then scales."""
     if jpeg_shape is None:

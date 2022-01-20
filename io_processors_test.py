@@ -17,7 +17,7 @@
 import numpy as np
 import tensorflow as tf
 
-from perceiver import io_processors
+from pathways import io_processors
 
 
 def _create_test_image(shape):

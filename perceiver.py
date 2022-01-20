@@ -33,8 +33,8 @@ from haiku._src.typing import (  # pylint: disable=g-multiple-import
 
 from typing import Any, Callable, Iterable, Mapping, Optional, Tuple, Type
 
-from perceiver import io_processors
-from perceiver import position_encoding
+from pathways import io_processors
+from pathways import position_encoding
 
 Array = Any
 
@@ -114,7 +114,7 @@ def conv_1d(
 
 class MultiChannelLinear(hk.Module):
     """
-    N parallel affine transformations. 
+    N parallel affine transformations.
     """
 
     def __init__(
@@ -275,7 +275,9 @@ class Attention(hk.Module):
 
         # Project QKV to a common feature dimension for each pathway.
         q = multi_channel_linear(
-            self._num_q_pathways, qk_channels_per_pathway, init_scale=self._init_scale,
+            self._num_q_pathways,
+            qk_channels_per_pathway,
+            init_scale=self._init_scale,
         )(inputs_q)
 
         k = multi_channel_linear(
@@ -328,7 +330,11 @@ class Attention(hk.Module):
         )
 
         result = attend(
-            q, k, v, dropout_prob=self._dropout_prob, attention_mask=attention_mask,
+            q,
+            k,
+            v,
+            dropout_prob=self._dropout_prob,
+            attention_mask=attention_mask,
         )
 
         return multi_channel_linear(

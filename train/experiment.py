@@ -27,7 +27,6 @@ from typing import Generator, Mapping, Text, Tuple
 from absl import app
 from absl import flags
 from absl import logging
-import datetime
 import haiku as hk
 import jax
 import jax.numpy as jnp
@@ -40,10 +39,11 @@ import numpy as np
 import optax
 import os
 
-from perceiver import io_processors
-from perceiver import perceiver
-import dataset
-import utils
+from pathways import io_processors
+from pathways import perceiver
+
+from . import dataset
+from . import utils
 
 FLAGS = flags.FLAGS
 
