@@ -91,7 +91,7 @@ def load(
     )
 
     ds = tfds.load(
-        "imagenette",  # "imagenet2012:5.*.*",
+        "imagenet2012:5.*.*",
         split=tfds_split,
         decoders={"image": tfds.decode.SkipDecoding()},
     )
