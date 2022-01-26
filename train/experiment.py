@@ -42,8 +42,8 @@ import os
 from pathways import io_processors
 from pathways import perceiver
 
-from . import dataset
-from . import utils
+from pathways.train import dataset
+from pathways.train import utils
 
 FLAGS = flags.FLAGS
 

@@ -27,7 +27,7 @@ import tensorflow.compat.v2 as tf
 import tensorflow_datasets as tfds
 import tensorflow_probability as tfp
 
-from . import autoaugment
+from pathways.train import autoaugment
 
 
 Batch = Mapping[Text, np.ndarray]
@@ -93,6 +93,7 @@ def load(
     ds = tfds.load(
         "imagenet2012:5.*.*",
         split=tfds_split,
+        download=False,
         decoders={"image": tfds.decode.SkipDecoding()},
     )
 
