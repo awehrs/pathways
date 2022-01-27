@@ -24,7 +24,7 @@ def get_config():
     local_batch_size = 16
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 1
+    config.n_epochs = 10
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value

@@ -4,11 +4,11 @@ EUROPE=europe-west4-a
 US=us-central1-f
 V2=v2-8
 V3=v3-8
-CONFIG_FILE=pathways/train/experiment.py
 DISK=pathwayperceiver/zones/europe-west4-a/disks/disk-1
 
 # Variables
 ZONE=$1
+CONFIG_FILE=$2
 
 if [ $ZONE = europe ]; then
     ACCELERATOR=$V3
