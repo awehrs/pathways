@@ -15,7 +15,7 @@ if [ $ZONE = europe ]; then
     ZONE=$EUROPE
 elif [ $ZONE = us ]; then 
     ACCELERATOR=$V2
-    ZONE=$US
+    ZONE=$U
 else 
     echo "Specify region"
     exit 125
@@ -39,7 +39,7 @@ gcloud alpha compute tpus tpu-vm ssh $TPU_NAME \
     sudo chmod a+w /mnt/disks/data
 
     # Set up imagenet
-    export TFDS_DATA_DIR=mnt/disks/data/tensorflow_datasets
+    export TFDS_DATA_DIR=/mnt/disks/data/tensorflow_datasets
     
     # Upgrade pip 
     /usr/bin/python3 -m pip install --upgrade pip
