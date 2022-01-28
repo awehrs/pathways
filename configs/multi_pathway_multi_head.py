@@ -24,7 +24,7 @@ def get_config():
     local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 1000
+    config.n_epochs = 100
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value
@@ -96,9 +96,9 @@ def get_config():
                             ),
                         ),
                         encoder=dict(
-                            num_self_attends_per_block=_default_or_debug(6, 2),
+                            num_self_attends_per_block=_default_or_debug(4, 2),
                             # Weights won't be shared if num_blocks is set to 1.
-                            num_blocks=_default_or_debug(8, 2),
+                            num_blocks=_default_or_debug(4, 2),
                             num_pathways_per_block=8,
                             z_index_dim=512,
                             num_z_channels=1024,
