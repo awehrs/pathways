@@ -8,7 +8,7 @@ import pathways.train.dataset as dataset
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
 N_CLASSES = 1000
-IS_LOCAL = False
+IS_LOCAL = True
 
 
 def get_training_steps(batch_size, n_epochs):
@@ -55,7 +55,7 @@ def get_config():
                         constant_fraction=0.5,
                         end_value=0.0,
                     ),
-                    optimizer="lamb",
+                    optimizer="adam",
                     # Optimizer-specific kwargs:
                     adam_kwargs=dict(
                         b1=0.9,
