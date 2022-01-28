@@ -8,7 +8,7 @@ import pathways.train.dataset as dataset
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
 N_CLASSES = 1000
-IS_LOCAL = False
+IS_LOCAL = True 
 
 
 def get_training_steps(batch_size, n_epochs):
@@ -96,9 +96,9 @@ def get_config():
                             ),
                         ),
                         encoder=dict(
-                            num_self_attends_per_block=_default_or_debug(4, 2),
+                            num_self_attends_per_block=_default_or_debug(8, 2),
                             # Weights won't be shared if num_blocks is set to 1.
-                            num_blocks=_default_or_debug(4, 2),
+                            num_blocks=_default_or_debug(8, 2),
                             num_pathways_per_block=8,
                             z_index_dim=512,
                             num_z_channels=1024,
