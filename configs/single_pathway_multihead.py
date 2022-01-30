@@ -8,7 +8,7 @@ import pathways.train.dataset as dataset
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
 N_CLASSES = 1000
-IS_LOCAL = False
+IS_LOCAL = True
 
 
 def get_training_steps(batch_size, n_epochs):
@@ -24,7 +24,7 @@ def get_config():
     local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
-    config.n_epochs = 110
+    config.n_epochs = 1000
 
     def _default_or_debug(default_value, debug_value):
         return debug_value if use_debug_settings else default_value
@@ -36,7 +36,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=5e-4,
+                    base_lr=.008, #5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
