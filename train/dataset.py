@@ -59,10 +59,10 @@ class Split(enum.Enum):
     @property
     def num_examples(self):
         return {
-            Split.TRAIN_AND_VALID: 1281167,
-            Split.TRAIN: 1271167,
-            Split.VALID: 10000,
-            Split.TEST: 50000,
+            Split.TRAIN_AND_VALID: 9469,
+            Split.TRAIN: 8469,
+            Split.VALID: 1000,
+            Split.TEST: 1000,
         }[self]
 
 
@@ -272,7 +272,7 @@ def my_mixup_cutmix(batch):
 
 def _to_tfds_split(split: Split) -> tfds.Split:
     """Returns the TFDS split appropriately sharded."""
-    # NOTE: Imagenet did not release labels for the test split used in the
+    # NOTE: Imagenet did not release labels for the test split used in the+
     # competition, so it has been typical at DeepMind to consider the VALID
     # split the TEST split and to reserve 10k images from TRAIN for VALID.
     if split in (Split.TRAIN, Split.TRAIN_AND_VALID, Split.VALID):
@@ -384,9 +384,11 @@ def _decode_whole_image(image_bytes: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
 
 def _decode_and_random_crop(image_bytes: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
     """Make a random crop of INPUT_DIM."""
-
     if image_bytes.dtype == tf.dtypes.string:
-        jpeg_shape = tf.image.extract_jpeg_shape(image_bytes)
+        try:  # jpeg
+            jpeg_shape = tf.image.extract_jpeg_shape(image_bytes)
+        except:  # other types
+            jpeg_shape, _ = _decode_whole_image(image_bytes)
     else:
         jpeg_shape = tf.shape(image_bytes)
 
