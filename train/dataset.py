@@ -62,7 +62,7 @@ class Split(enum.Enum):
             Split.TRAIN_AND_VALID: 1281167,
             Split.TRAIN: 1271167,
             Split.VALID: 10000,
-            Split.TEST: 50000},
+            Split.TEST: 50000,
         }[self]
 
 
