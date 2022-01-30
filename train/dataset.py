@@ -388,7 +388,7 @@ def _decode_and_random_crop(image_bytes: tf.Tensor) -> Tuple[tf.Tensor, tf.Tenso
         try:  # jpeg
             jpeg_shape = tf.image.extract_jpeg_shape(image_bytes)
         except:  # other types
-            jpeg_shape, _ = _decode_whole_image(image_bytes)
+            _, jpeg_shape = _decode_whole_image(image_bytes)
     else:
         jpeg_shape = tf.shape(image_bytes)
 
