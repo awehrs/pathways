@@ -8,7 +8,7 @@ import pathways.train.dataset as dataset
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
 N_CLASSES = 1000
-IS_LOCAL = True
+IS_LOCAL = False
 
 
 def get_training_steps(batch_size, n_epochs):
@@ -21,7 +21,7 @@ def get_config():
     config = base_config.get_base_config()
 
     # Experiment config.
-    local_batch_size = 4
+    local_batch_size = 8
     num_devices = jax.device_count()
     config.train_batch_size = local_batch_size * num_devices
     config.n_epochs = 1000
