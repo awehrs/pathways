@@ -110,7 +110,7 @@ def load(
             # Only cache if we are reading a subset of the dataset.
             ds = ds.cache()
         ds = ds.repeat()
-        ds = ds.shuffle(buffer_size=10 * total_batch_size, seed=1)
+        ds = ds.shuffle(buffer_size=10 * total_batch_size, seed=42)
 
     else:
         if split.num_examples % total_batch_size != 0:
