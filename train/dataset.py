@@ -59,8 +59,8 @@ class Split(enum.Enum):
     @property
     def num_examples(self):
         return {
-            Split.TRAIN_AND_VALID: 1281167,
-            Split.TRAIN: 1271167,
+            Split.TRAIN_AND_VALID: 1281166, #1281167,
+            Split.TRAIN: 1271166, #1271167,
             Split.VALID: 10000,
             Split.TEST: 50000,
         }[self]
@@ -110,7 +110,7 @@ def load(
             # Only cache if we are reading a subset of the dataset.
             ds = ds.cache()
         ds = ds.repeat()
-        ds = ds.shuffle(buffer_size=10 * total_batch_size, seed=42)
+        ds = ds.shuffle(buffer_size=10 * total_batch_size, seed=0)
 
     else:
         if split.num_examples % total_batch_size != 0:
