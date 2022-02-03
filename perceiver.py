@@ -863,8 +863,8 @@ class BasicDecoder(AbstractPerceiverDecoder):
 
     def __call__(self, query, z, *, is_training, query_mask=None):
         # Cross-attention decoding.
-        # key, value: B x P x N x K; query: B x 1 x M x K
-        # Attention maps -> B x (P x N) x M
+        # key, value: B x 1 x (P x N) x K; query: B x 1 x M x K
+        # Attention maps -> B x 1 x (P x N) x M
         # Output -> B x M x K
         # Construct cross attention and linear layer lazily, in case we don't need
         # them.
@@ -932,7 +932,7 @@ class ClassificationDecoder(AbstractPerceiverDecoder):
     def __call__(self, query, z, *, is_training, query_mask=None):
         # B x 1 x num_classes -> B x num_classes
         logits = self.decoder(query, z, is_training=is_training)
-        return logits[:, 0, :]
+        return logits[:, :, 0, :]
 
 
 class MultimodalDecoder(AbstractPerceiverDecoder):
