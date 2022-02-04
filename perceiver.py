@@ -857,7 +857,7 @@ class BasicDecoder(AbstractPerceiverDecoder):
                 )
             pos_emb = jnp.concatenate([inputs_without_pos, pos_emb], axis=-1)
 
-        pos_emb = jnp.reshape(pos_emb, [pos_emb.shape[0], 1, -1, pos_emb.shape[-1]])
+        pos_emb = pos_emb[:, None, :, :]
 
         return pos_emb
 
@@ -888,7 +888,7 @@ class BasicDecoder(AbstractPerceiverDecoder):
         )
         output = decoding_cross_attn(
             query, z, is_training=is_training, attention_mask=attention_mask
-        )
+        )[:, 0, :, :]
         if self._final_project:
             output = final_layer(output)
         return output
@@ -932,7 +932,7 @@ class ClassificationDecoder(AbstractPerceiverDecoder):
     def __call__(self, query, z, *, is_training, query_mask=None):
         # B x 1 x num_classes -> B x num_classes
         logits = self.decoder(query, z, is_training=is_training)
-        return logits[:, :, 0, :]
+        return logits[:, 0, :]
 
 
 class MultimodalDecoder(AbstractPerceiverDecoder):
