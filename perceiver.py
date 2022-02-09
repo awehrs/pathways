@@ -55,12 +55,12 @@ def attend(
     Args:
       q: Query with shape [batch, num_pathways, q_indices, num_heads_per_pathway, head_dim].
       k: Key with shape [batch, num_pathways, kv_indices, num_heads_per_pathway, head_dim].
-      v: Value with shape [batch, num_pathhways, num_heads_per_pathway, head_dim].
+      v: Value with shape [batch, num_pathhways, kv_indices, num_heads_per_pathway, head_dim].
       dropout_prob: dropout probability on the attention weights.
       attention_mask: Array of shape [batch, q_indices, kv_indices] indicating
         which attentions are valid
     Returns:
-      Output of the attention with shape [batch, num_pathways, num_latents_per_pathway, hiddens]
+      Output of the attention with shape [batch, num_pathways, num_latents_per_pathway, hidden_dim]
     """
     batch, pathways, q_indices, heads_per_pathway, q_head_dim = q.shape
     _, _, _, _, v_head_dim = v.shape
@@ -233,8 +233,8 @@ class Attention(hk.Module):
     def __call__(self, inputs_q, inputs_kv, attention_mask=None):
         """
         Args:
-            inputs_q: shape = [batch, num_q_pathways, num_q_per_pathway, latent_dim]
-            inputs_kv: shape = [batch, num_kv_pathways, num_kv_per_pathway, input_dim]
+            inputs_q: shape = [batch, num_q_pathways, num_q_per_pathway, q_channels]
+            inputs_kv: shape = [batch, num_kv_pathways, num_kv_per_pathway, kv_channels]
         """
         # Only allow cross atention with single pathway input.
         if (self._num_kv_pathways != self._num_q_pathways) and (
@@ -257,44 +257,40 @@ class Attention(hk.Module):
         if self._output_channels is None:
             self._output_channels = self._v_channels
 
-        total_num_heads = self._num_q_pathways * self._num_heads_per_pathway
-
-        if self._qk_channels % total_num_heads != 0:
+        if self._qk_channels % self._num_heads_per_pathway != 0:
             raise ValueError(
                 f"qk_channels ({self._qk_channels}) must be divisible by"
-                f" num_pathways ({self._num_q_pathways}) * num_heads_per_pathway ({self._num_heads_per_pathway})."
+                f" num_heads_per_pathway ({self._num_heads_per_pathway})."
             )
-        if self._v_channels % total_num_heads != 0:
+        if self._v_channels % self._num_heads_per_pathway != 0:
             raise ValueError(
                 f"v_channels ({self._v_channels}) must be divisible by"
-                f" num_pathways ({self._num_q_pathways}) * num_heads_per_pathway ({self._num_heads_per_pathway})."
+                f"num_heads_per_pathway ({self._num_heads_per_pathway})."
             )
-        qk_channels_per_pathway = self._qk_channels // self._num_q_pathways
-        qk_channels_per_head = self._qk_channels // total_num_heads
-        v_channels_per_head = self._v_channels // total_num_heads
 
         # Project QKV to a common feature dimension for each pathway.
         q = multi_channel_linear(
             self._num_q_pathways,
-            qk_channels_per_pathway,
+            self._qk_channels,
             init_scale=self._init_scale,
         )(inputs_q)
 
         k = multi_channel_linear(
             self._num_kv_pathways,
-            self._qk_channels // self._num_kv_pathways,
-            # = qk_channels for cross attention, qk_chanels_per_pathway for self attention.
+            self._qk_channels,
             init_scale=self._init_scale,
         )(inputs_kv)
 
         v = multi_channel_linear(
             self._num_kv_pathways,
-            self._v_channels // self._num_kv_pathways,
-            # = v_channels for cross attention, v_chanels_per_pathway for self attention.
+            self._v_channels,
             init_scale=self._init_scale,
         )(inputs_kv)
 
         # Reshape channels for multi-head attention.
+        qk_channels_per_head = self._qk_channels // self._num_heads_per_pathway
+        v_channels_per_head = self._v_channels // self._num_heads_per_pathway
+
         batch, _, q_time, _ = q.shape
         _, _, kv_time, _ = k.shape
 
@@ -478,13 +474,17 @@ class CrossAttention(hk.Module):
         if self._v_channels is not None:
             v_channels = self._v_channels
 
+        # Ensure queries have proper dimension (i.e., a pathway dimension)
+        if len(inputs_q.shape) == 3:
+            raise ValueError(f"inputs_kv.shape ({inputs_q.shape}) must be of length 4")
+
         # Ensure key/value inputs have only one pathway.
         if len(inputs_kv.shape) == 3:
             # Cross attention with single-pathway inputs (e.g., initial encoder cross-attend).
             _, kv_time, kv_channels = inputs_kv.shape
-            inputs_kv = jnp.expand_dims(inputs_kv, axis=1)
+            inputs_kv = inputs_kv[:, None, :, :]
         elif len(inputs_kv.shape) == 4:
-            # Cross attention with multi-pathway inputs (e.g., decoder cross-attend)
+            # Cross attention with multi-pathway inputs (e.g., cross attend between blocks)
             _, kv_pathways, kv_time, kv_channels = inputs_kv.shape
             inputs_kv = jnp.reshape(
                 inputs_kv, (batch, 1, kv_pathways * kv_time, kv_channels)
@@ -683,7 +683,7 @@ class PerceiverEncoder(hk.Module):
         for _ in range(num_self_attends_per_block):
             self_attend = SelfAttention(
                 num_pathways=num_pathways_per_block,
-                num_heads_per_pathway=num_cross_attend_heads_per_block,
+                num_heads_per_pathway=num_self_attend_heads_per_pathway,
                 dropout_prob=dropout_prob,
                 qk_channels=qk_channels,
                 v_channels=v_channels,
@@ -857,6 +857,7 @@ class BasicDecoder(AbstractPerceiverDecoder):
                 )
             pos_emb = jnp.concatenate([inputs_without_pos, pos_emb], axis=-1)
 
+        # Add pathway dimension for cross attention compatability.
         pos_emb = pos_emb[:, None, :, :]
 
         return pos_emb
@@ -888,7 +889,10 @@ class BasicDecoder(AbstractPerceiverDecoder):
         )
         output = decoding_cross_attn(
             query, z, is_training=is_training, attention_mask=attention_mask
-        )[:, 0, :, :]
+        )[
+            :, 0, :, :
+        ]  # Remove singleton pathway dimension
+
         if self._final_project:
             output = final_layer(output)
         return output
