@@ -308,7 +308,7 @@ class Attention(hk.Module):
             k,
             [
                 batch,
-                self._num_q_pathways,
+                self._num_kv_pathways,
                 kv_time,
                 self._num_heads_per_pathway,
                 qk_channels_per_head,
@@ -318,7 +318,7 @@ class Attention(hk.Module):
             v,
             [
                 batch,
-                self._num_q_pathways,
+                self._num_kv_pathways,
                 kv_time,
                 self._num_heads_per_pathway,
                 v_channels_per_head,
