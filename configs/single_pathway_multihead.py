@@ -36,7 +36,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=.04, #5e-4,
+                    base_lr=0.04,  # 5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
@@ -102,8 +102,6 @@ def get_config():
                             num_pathways_per_block=1,
                             z_index_dim=512,
                             num_z_channels=1024,
-                            num_channels_for_pathways=256,
-                            concat_or_add_pos="concat",
                             num_cross_attend_heads_per_pathway=1,
                             num_self_attend_heads_per_pathway=8,
                             cross_attend_widening_factor=1,

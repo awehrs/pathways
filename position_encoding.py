@@ -14,6 +14,7 @@
 """Position encodings and utilities."""
 
 import abc
+from einops import rearrange, repeat
 import functools
 
 import haiku as hk
@@ -125,49 +126,22 @@ class TrainablePositionEncoding(AbstractPositionEncoding):
     def __init__(
         self,
         index_dim: int,
-        num_pathways: Optional[int] = None,
+        num_pathways: int = None,
         num_channels: int = 128,
-        num_channels_for_pathways: int = 64,
         init_scale: float = 0.02,
-        concat_or_add_pos: Optional[str] = None,
         name=None,
     ):
         super(TrainablePositionEncoding, self).__init__(name=name)
-        # Perform checks relevant for multi-pathway architecture.
-        if num_pathways is not None:
-            if concat_or_add_pos not in ["concat", "add"]:
-                raise ValueError(
-                    f"Invalid value {concat_or_add_pos} for concat_or_add_pos"
-                    f" when num_pathways greater than 1."
-                )
-            elif concat_or_add_pos == "concat":
-                if num_channels <= num_channels_for_pathways:
-                    raise ValueError(
-                        f"num_channels {num_channels} must be greater than"
-                        f" channels for pathway encoding {num_channels_for_pathways}"
-                        f" if vector concatenation used."
-                    )
-                else:
-                    num_channels_for_position = num_channels - num_channels_for_pathways
-            elif concat_or_add_pos == "add":
-                if num_channels != num_channels_for_pathways:
-                    raise ValueError(
-                        f"num_channels {num_channels} must be equal to"
-                        f" channels for pathway encoding {num_channels_for_pathways}"
-                        f" if vector addition used."
-                    )
-                else:
-                    num_channels_for_position = num_channels
-        else:
-            num_channels_for_position = num_channels
-
+        # Make sure multi-pathway architecture works here.
+        if (num_pathways is not None) and (index_dim % num_pathways != 0):
+            raise ValueError(
+                f"index_dim {index_dim} must be divisible by"
+                f" num_pathways greater than {num_pathways}."
+            )
         self._num_channels = num_channels
-        self._num_channels_for_pathways = num_channels_for_pathways
-        self._num_channels_for_position = num_channels_for_position
         self._index_dim = index_dim
         self._num_pathways = num_pathways
         self._init_scale = init_scale
-        self._concat_or_add_pos = concat_or_add_pos
 
     def __call__(self, batch_size, pos=None):
         del pos  # Unused.
@@ -175,35 +149,18 @@ class TrainablePositionEncoding(AbstractPositionEncoding):
         # Create positional embeddings.
         pos_embs = hk.get_parameter(
             "pos_embs",
-            [self._index_dim, self._num_channels_for_position],
+            [self._index_dim, self._num_channels],
             init=hk.initializers.TruncatedNormal(stddev=self._init_scale),
         )
+
+        # Rearrange into pathways.
         if self._num_pathways is not None:
-            # Reuse positional encodings across pathways.
-            pos_embs = jnp.broadcast_to(
-                pos_embs[None, :, :], (self._num_pathways,) + pos_embs.shape
-            )  # [num_pathways, index_dim, num_pathways_for_position]
+            pos_embs = rearrange(pos_embs, "(p t) d -> p t d", p=self._num_pathways)
 
-            # Create encoding for each pathway.
-            pwy_embs = hk.get_parameter(
-                "pwy_embs",
-                [self._num_pathways, self._num_channels_for_pathways],
-                init=hk.initializers.TruncatedNormal(stddev=self._init_scale),
-            )
-            pwy_embs = jnp.broadcast_to(
-                pwy_embs[:, None, :], pos_embs.shape[:2] + (pwy_embs.shape[-1],)
-            )  # [num_pathways, index_dim, num_channels_for_pathways]
-
-            # Combine positional and pathway encodings.
-            if self._concat_or_add_pos == "concat":
-                pos_embs = jnp.concatenate([pos_embs, pwy_embs], axis=-1)
-            elif self._concat_or_add_pos == "add":
-                pos_embs += pwy_embs
-
+        # Broadcast to batch dimension.
         if batch_size is not None:
-            pos_embs = jnp.broadcast_to(
-                jnp.expand_dims(pos_embs, axis=0), (batch_size,) + pos_embs.shape
-            )
+            pos_embs = repeat(pos_embs, "... -> b ...", b=batch_size)
+
         return pos_embs
 
 

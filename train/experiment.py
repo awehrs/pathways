@@ -298,8 +298,6 @@ class Experiment(experiment.AbstractExperiment):
             self._initialize_train()
 
         inputs = next(self._train_input)
-        
-        #logging.info(hk.experimental.tabulate(self.forward)(inputs, is_training=True))
 
         self._params, self._state, self._opt_state, scalars = self._update_func(
             self._params, self._state, self._opt_state, inputs, rng, global_step

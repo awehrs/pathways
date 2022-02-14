@@ -59,10 +59,10 @@ class Split(enum.Enum):
     @property
     def num_examples(self):
         return {
-            Split.TRAIN_AND_VALID: 1281166, #1281167,
-            Split.TRAIN: 1271166, #1271167,
-            Split.VALID: 10000,
-            Split.TEST: 50000,
+            Split.TRAIN_AND_VALID: 9469,  # 1281167,
+            Split.TRAIN: 8469,  # 1271167,
+            Split.VALID: 1000,
+            Split.TEST: 1000,
         }[self]
 
 
@@ -91,7 +91,7 @@ def load(
     )
 
     ds = tfds.load(
-        "imagenet2012:5.*.*",
+        "imagenette",
         split=tfds_split,
         download=False,
         decoders={"image": tfds.decode.SkipDecoding()},

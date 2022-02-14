@@ -17,6 +17,7 @@
 import abc
 import math
 
+from einops import rearrange
 import haiku as hk
 import jax
 from jax._src.numpy.lax_numpy import append
@@ -66,7 +67,7 @@ def attend(
     _, _, _, _, v_head_dim = v.shape
     hiddens = heads_per_pathway * v_head_dim
 
-    attention = jnp.einsum("bpthd,bpThd->bphtT", q, k)
+    attention = jnp.einsum("bpthd, bpThd -> bphtT", q, k)
 
     scale = 1.0 / math.sqrt(q_head_dim)
     attention *= scale
@@ -82,8 +83,8 @@ def attend(
     normalized = jax.nn.softmax(attention)
     if dropout_prob > 0:
         normalized = hk.dropout(hk.next_rng_key(), dropout_prob, normalized)
-    summed = jnp.einsum("bphtT,bpThd->bpthd", normalized, v)
-    summed = jnp.reshape(summed, [batch, pathways, q_indices, hiddens])
+    summed = jnp.einsum("bphtT, bpThd -> bpthd", normalized, v)
+    summed = rearrange(summed, "b p t h d -> b p t (h d)")
 
     if attention_mask is not None:
         # If all attended tokens are masked, or for masked tokens
@@ -244,14 +245,17 @@ class Attention(hk.Module):
                 f"num_kv_pathways ({self._num_kv_pathways}) must equal 1"
                 f" if not equal to num_q_pathways ({self._num_q_pathways})."
             )
+
         # Q and K must have the same number of channels.
         # Default to preserving Q's input's shape.
         if self._qk_channels is None:
             self._qk_channels = inputs_q.shape[-1]
+
         # V's num_channels determines the shape of the output of QKV-attention.
         # Default to the same number of channels used in the key-query operation.
         if self._v_channels is None:
             self._v_channels = self._qk_channels
+
         # Project the output of QKV attention to a desired number of channels.
         # Default to the same number as the output of the QKV attention operation.
         if self._output_channels is None:
@@ -657,11 +661,9 @@ class PerceiverEncoder(hk.Module):
 
         # Construct the latent array initial state.
         self.z_pos_enc = position_encoding.TrainablePositionEncoding(
-            index_dim=z_index_dim // num_pathways_per_block,
+            index_dim=z_index_dim,
             num_pathways=num_pathways_per_block,
             num_channels=num_z_channels,
-            num_channels_for_pathways=num_channels_for_pathways,
-            concat_or_add_pos=concat_or_add_pos,
             init_scale=z_pos_enc_init_scale,
         )
 
