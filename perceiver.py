@@ -273,23 +273,27 @@ class Attention(hk.Module):
             )
 
         # Project QKV to a common feature dimension for each pathway.
-        q = multi_channel_linear(
-            self._num_q_pathways,
-            self._qk_channels,
-            init_scale=self._init_scale,
-        )(inputs_q)
+        # q = multi_channel_linear(
+        #     self._num_q_pathways,
+        #     self._qk_channels,
+        #     init_scale=self._init_scale,
+        # )(inputs_q)
 
-        k = multi_channel_linear(
-            self._num_kv_pathways,
-            self._qk_channels,
-            init_scale=self._init_scale,
-        )(inputs_kv)
+        # k = multi_channel_linear(
+        #     self._num_kv_pathways,
+        #     self._qk_channels,
+        #     init_scale=self._init_scale,
+        # )(inputs_kv)
 
-        v = multi_channel_linear(
-            self._num_kv_pathways,
-            self._v_channels,
-            init_scale=self._init_scale,
-        )(inputs_kv)
+        # v = multi_channel_linear(
+        #     self._num_kv_pathways,
+        #     self._v_channels,
+        #     init_scale=self._init_scale,
+        # )(inputs_kv)
+
+        q = conv_1d(self._qk_channels, init_scale=self._init_scale)(inputs_q)
+        k = conv_1d(self._qk_channels, init_scale=self._init_scale)(inputs_kv)
+        v = conv_1d(self._v_channels, init_scale=self._init_scale)(inputs_kv)
 
         # Reshape channels for multi-head attention.
         qk_channels_per_head = self._qk_channels // self._num_heads_per_pathway
