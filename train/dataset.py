@@ -93,7 +93,7 @@ def load(
     ds = tfds.load(
         "imagenette",
         split=tfds_split,
-        download=False,
+        #download=False,
         decoders={"image": tfds.decode.SkipDecoding()},
     )
 
