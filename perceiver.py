@@ -341,12 +341,17 @@ class Attention(hk.Module):
             attention_mask=attention_mask,
         )
 
-        return multi_channel_linear(
-            self._num_q_pathways,
+#         return multi_channel_linear(
+#             self._num_q_pathways,
+#             self._output_channels,
+#             with_bias=self._with_final_bias,
+#             init_scale=self._final_init_scale,
+#         )(result)
+
+        return conv_1d(
             self._output_channels,
             with_bias=self._with_final_bias,
-            init_scale=self._final_init_scale,
-        )(result)
+            init_scale=self._final_init_scale)(result)
 
 
 class MLP(hk.Module):
