@@ -7,7 +7,7 @@ import pathways.train.dataset as dataset
 
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
-N_CLASSES = 1000
+N_CLASSES = 10
 IS_LOCAL = True
 
 #
