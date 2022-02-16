@@ -7,7 +7,7 @@ import pathways.train.dataset as dataset
 
 
 N_TRAIN_EXAMPLES = dataset.Split.TRAIN_AND_VALID.num_examples
-N_CLASSES = 1000
+N_CLASSES = 10
 IS_LOCAL = True
 
 
@@ -36,7 +36,7 @@ def get_config():
         dict(
             config=dict(
                 optimizer=dict(
-                    base_lr=0.008,  # 5e-4,
+                    base_lr=5e-4,
                     max_norm=10.0,  # < 0 to turn off.
                     schedule_type="constant_cosine",
                     weight_decay=1e-1,
