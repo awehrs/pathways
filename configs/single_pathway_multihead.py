@@ -100,8 +100,8 @@ def get_config():
                             # Weights won't be shared if num_blocks is set to 1.
                             num_blocks=_default_or_debug(8, 2),
                             num_pathways_per_block=1,
-                            z_index_dim=512,
-                            num_z_channels=1024,
+                            z_index_dim=_default_or_debug(512, 128),
+                            num_z_channels=_default_or_debug(1024, 256),
                             num_cross_attend_heads_per_pathway=1,
                             num_self_attend_heads_per_pathway=8,
                             cross_attend_widening_factor=1,
@@ -113,12 +113,12 @@ def get_config():
                             use_query_residual=True,
                         ),
                         decoder=dict(
-                            num_z_channels=1024,
+                            num_z_channels=_default_or_debug(1024, 256),
                             use_query_residual=True,
                             # Position encoding for the output logits.
                             position_encoding_type="trainable",
                             trainable_position_encoding_kwargs=dict(
-                                num_channels=1024,
+                                num_channels=_default_or_debug(1024, 256),
                                 init_scale=0.02,
                             ),
                         ),
